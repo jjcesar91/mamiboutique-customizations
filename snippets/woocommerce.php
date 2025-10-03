@@ -33,6 +33,7 @@ add_action( 'plugins_loaded', function () {
         }, 36);
         
         // AJAX Add to Cart functionality
+        /*
         add_action('wp_enqueue_scripts', function () {
             if (!is_product()) return;
 
@@ -75,17 +76,92 @@ add_action( 'plugins_loaded', function () {
                 </div>
             </div>
         <?php });
+        */
+
+
         
-        /**
-         * === Add more WooCommerce snippets below ===
-         * Example:
-         *
-         * add_filter( 'woocommerce_get_price_html', function( $price, $product ) {
-         *     if ( is_product() ) {
-         *         $price .= ' <span class="iva-label">(IVA inclusa)</span>';
-         *     }
-         *     return $price;
-         * }, 100, 2 );
-         */
+
     }
+});
+
+/**
+ * Menu items with images
+ * If a menu item has a Title Attribute that's a URL, prepend an <img>
+ * Uses multiple approaches for maximum theme compatibility including mega menus
+ */
+
+// Primary approach: Hook into walker output (most reliable)
+add_filter('walker_nav_menu_start_el', function ($item_output, $item, $depth, $args) {
+    // Check if the title attribute contains a valid URL
+    if (!empty($item->attr_title) && filter_var($item->attr_title, FILTER_VALIDATE_URL)) {
+        // Extract the link text from the item output
+        $link_text = $item->title;
+        
+        // Create the image tag
+        $img = '<img class="menu-img" src="' . esc_url($item->attr_title) . '" alt="' . esc_attr(wp_strip_all_tags($link_text)) . '">';
+        
+        // Replace the link text with image + text
+        $new_text = $img . '<span class="menu-text">' . $link_text . '</span>';
+        
+        // Replace the title in the output
+        $item_output = str_replace($link_text, $new_text, $item_output);
+    }
+    
+    return $item_output;
+}, 10, 4);
+
+// Fallback approach: Hook into title filter (for themes that support it)
+add_filter('nav_menu_item_title', function ($title, $item, $args, $depth) {
+    if (!empty($item->attr_title) && filter_var($item->attr_title, FILTER_VALIDATE_URL)) {
+        $img = '<img class="menu-img" src="' . esc_url($item->attr_title) . '" alt="' . esc_attr(wp_strip_all_tags($title)) . '">';
+        // Image + text (remove the span if you want image-only)
+        $title = $img . '<span class="menu-text">' . $title . '</span>';
+    }
+    return $title;
+}, 10, 4);
+
+// Mega Menu approach: Use JavaScript to transform after page load
+add_action('wp_footer', function() {
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find all menu links with title attributes that are URLs
+        var menuLinks = document.querySelectorAll('a.mega-menu-link[title], .menu a[title], nav a[title], .navbar a[title]');
+        
+        menuLinks.forEach(function(link) {
+            var titleAttr = link.getAttribute('title');
+            
+            // Check if title attribute is a valid URL
+            if (titleAttr && (titleAttr.startsWith('http://') || titleAttr.startsWith('https://'))) {
+                var linkText = link.textContent.trim();
+                
+                // Create image element that fills the full width
+                var img = document.createElement('img');
+                img.src = titleAttr;
+                img.alt = linkText;
+                img.className = 'menu-img-full';
+                img.style.display = 'block';
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.objectFit = 'contain';
+                img.style.margin = '0';
+                img.style.maxHeight = '60px'; // Adjust this as needed
+                
+                // Clear the link and add only the image (no text)
+                link.innerHTML = '';
+                link.appendChild(img);
+                
+                // Style the link to fill the container
+                link.style.display = 'block';
+                link.style.width = '100%';
+                link.style.textAlign = 'center';
+                link.style.padding = '10px 5px'; // Add some padding
+                
+                // Remove the title attribute so it doesn't show as tooltip
+                link.removeAttribute('title');
+            }
+        });
+    });
+    </script>
+    <?php
 });

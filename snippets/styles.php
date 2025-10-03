@@ -246,6 +246,60 @@ function add_custom_site_styles() {
             right: 10px;
         }
     }
+
+    /* Menu Items with Images */
+    .menu img.menu-img,
+    ul.menu img.menu-img,
+    nav img.menu-img,
+    .navbar img.menu-img,
+    .navigation img.menu-img,
+    .mega-menu img.menu-img,
+    .mega-sub-menu img.menu-img,
+    a.mega-menu-link img.menu-img {
+        display: inline-block !important;
+        width: 24px !important;
+        height: 24px !important;
+        object-fit: cover !important;
+        margin-right: .5rem !important;
+        vertical-align: middle !important;
+    }
+    .menu .menu-text,
+    ul.menu .menu-text,
+    nav .menu-text,
+    .navbar .menu-text,
+    .navigation .menu-text,
+    .mega-menu .menu-text,
+    .mega-sub-menu .menu-text,
+    a.mega-menu-link .menu-text {
+        vertical-align: middle !important;
+    }
+    
+    /* Full-width menu images (image-only menu items) */
+    .menu img.menu-img-full,
+    ul.menu img.menu-img-full,
+    nav img.menu-img-full,
+    .navbar img.menu-img-full,
+    .navigation img.menu-img-full,
+    .mega-menu img.menu-img-full,
+    .mega-sub-menu img.menu-img-full,
+    a.mega-menu-link img.menu-img-full {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+        margin: 0 !important;
+        max-height: 60px !important;
+    }
+    
+    /* Style the mega menu items with full-width images */
+    .mega-menu-item a.mega-menu-link:has(img.menu-img-full),
+    .mega-sub-menu li a:has(img.menu-img-full) {
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px 5px !important;
+        box-sizing: border-box !important;
+    }
     </style>
     <?php
 }
