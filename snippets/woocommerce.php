@@ -44,7 +44,7 @@ add_action( 'plugins_loaded', function () {
                 'wc-single-ajax-add-to-cart',
                 plugins_url('assets/js/wc-single-ajax-add-to-cart.js', dirname(__FILE__)),
                 ['jquery'],
-                '1.1',
+                '1.8',
                 true
             );
 
@@ -52,7 +52,8 @@ add_action( 'plugins_loaded', function () {
             wp_add_inline_script(
                 'wc-single-ajax-add-to-cart',
                 'window.__wcSingleAjax = {
-                    wcAjaxUrl: "' . esc_js( WC_AJAX::get_endpoint('%%endpoint%%') ) . '",
+                    ajaxUrl: "' . esc_js( admin_url('admin-ajax.php') ) . '",
+                    wcAjaxUrl: "' . esc_js( home_url('/') ) . '?wc-ajax=",
                     checkoutUrl: "' . esc_js( wc_get_checkout_url() ) . '"
                 };',
                 'before'

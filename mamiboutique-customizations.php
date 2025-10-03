@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mami Boutique Customizations
  * Description: Central place for your site-specific PHP snippets (WooCommerce, theme tweaks, etc.).
- * Version:     1.0.16
+ * Version:     1.0.32
  * Author:      Julio Cesar Plascencia
  */
 
