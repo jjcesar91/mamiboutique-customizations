@@ -23,6 +23,12 @@ add_action( 'plugins_loaded', function () {
         remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
         add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 35 );
         
+        // Free shipping message after price
+        add_action( 'woocommerce_single_product_summary', 'display_free_shipping_message', 15 );
+        
+        // Free shipping message on cart page
+        add_action( 'woocommerce_before_cart', 'display_cart_free_shipping_message' );
+        
         // WC Trust Links below Add to Cart button
         add_action('woocommerce_single_product_summary', function () {
             echo '<div class="wc-trust-links" style="margin-top:12px; font-size:14px; line-height:1.4;">'
@@ -31,55 +37,128 @@ add_action( 'plugins_loaded', function () {
                 . '<a href="' . esc_url( home_url('/politica-di-reso/') ) . '">Politica di reso</a>'
                 . '</div>';
         }, 36);
+
+        // Highlight required WooCommerce checkout fields not filled in
+        // Evidenzia i campi obbligatori del checkout non compilati con bordo rosso
         
-        // AJAX Add to Cart functionality
-        /*
-        add_action('wp_enqueue_scripts', function () {
-            if (!is_product()) return;
-
-            // Assicura aggiornamento mini-cart
-            wp_enqueue_script('wc-cart-fragments');
-
-            // JS personalizzato (now from plugin directory)
-            wp_enqueue_script(
-                'wc-single-ajax-add-to-cart',
-                plugins_url('assets/js/wc-single-ajax-add-to-cart.js', dirname(__FILE__)),
-                ['jquery'],
-                '1.8',
-                true
-            );
-
-            // Passo endpoint AJAX + URL checkout al JS
-            wp_add_inline_script(
-                'wc-single-ajax-add-to-cart',
-                'window.__wcSingleAjax = {
-                    ajaxUrl: "' . esc_js( admin_url('admin-ajax.php') ) . '",
-                    wcAjaxUrl: "' . esc_js( home_url('/') ) . '?wc-ajax=",
-                    checkoutUrl: "' . esc_js( wc_get_checkout_url() ) . '"
-                };',
-                'before'
-            );
-        }, 20);
-
-        // Add to Cart Modal HTML
-        add_action('wp_footer', function () {
-            if (!is_product()) return; ?>
-            <div class="wc-added-modal-backdrop" id="wc-added-modal-backdrop" aria-hidden="true">
-                <div class="wc-added-modal" role="dialog" aria-live="polite" aria-label="Prodotto aggiunto al carrello">
-                    <span class="wc-close" id="wc-added-modal-close" aria-label="Chiudi">✕</span>
-                    <span class="wc-check">✓</span>
-                    <div class="wc-title">Prodotto aggiunto al carrello</div>
-                    <div class="wc-actions">
-                        <button type="button" class="btn btn-outline" id="wc-continue-shopping">CONTINUA LO SHOPPING</button>
-                        <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="btn" id="wc-go-checkout">COMPLETA L'ACQUISTO</a>
-                    </div>
-                </div>
-            </div>
-        <?php });
-        */
-
-
+        // Add CSS for error field highlighting
+        add_action('wp_head', function() {
+            if (!is_checkout()) return;
+            ?>
+            <style>
+            /* WooCommerce checkout field error highlighting */
+            .woocommerce-invalid input,
+            .woocommerce-invalid select,
+            .woocommerce-invalid textarea {
+                border: 2px solid #e53935 !important;
+                background-color: #ffecec !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            /* Select2 dropdown error highlighting */
+            .woocommerce-invalid .select2-container .select2-selection {
+                border: 2px solid #e53935 !important;
+                background-color: #ffecec !important;
+            }
+            
+            /* Additional targeting for checkout validation errors */
+            .checkout .form-row.woocommerce-invalid input,
+            .checkout .form-row.woocommerce-invalid select,
+            .checkout .form-row.woocommerce-invalid textarea {
+                border: 2px solid #e53935 !important;
+                background-color: #ffecec !important;
+            }
+            </style>
+            <?php
+        });
         
+        // Add JavaScript for additional error highlighting
+        add_action('wp_footer', function() {
+            if (!is_checkout()) return;
+            ?>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                
+                // Function to highlight error fields
+                function highlightErrorFields() {
+                    // Method 1: Use error list data-id attributes
+                    const errorItems = document.querySelectorAll('.woocommerce-error li[data-id]');
+                    errorItems.forEach(item => {
+                        const fieldId = item.getAttribute('data-id');
+                        if (fieldId) {
+                            const field = document.querySelector('#' + fieldId);
+                            if (field) {
+                                field.style.border = '2px solid #e53935';
+                                field.style.backgroundColor = '#ffecec';
+                                field.style.transition = 'all 0.3s ease';
+                                
+                                // Handle Select2 dropdowns
+                                const select2Container = field.nextElementSibling;
+                                if (select2Container && select2Container.classList.contains('select2-container')) {
+                                    const select2Selection = select2Container.querySelector('.select2-selection');
+                                    if (select2Selection) {
+                                        select2Selection.style.border = '2px solid #e53935';
+                                        select2Selection.style.backgroundColor = '#ffecec';
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Method 2: Target fields with aria-invalid="true"
+                    const invalidFields = document.querySelectorAll('input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"]');
+                    invalidFields.forEach(field => {
+                        field.style.border = '2px solid #e53935';
+                        field.style.backgroundColor = '#ffecec';
+                        field.style.transition = 'all 0.3s ease';
+                    });
+                    
+                    // Method 3: Target fields in woocommerce-invalid containers
+                    const invalidContainers = document.querySelectorAll('.woocommerce-invalid input, .woocommerce-invalid select, .woocommerce-invalid textarea');
+                    invalidContainers.forEach(field => {
+                        field.style.border = '2px solid #e53935';
+                        field.style.backgroundColor = '#ffecec';
+                        field.style.transition = 'all 0.3s ease';
+                    });
+                }
+                
+                // Run immediately
+                highlightErrorFields();
+                
+                // Run after AJAX updates
+                if (typeof jQuery !== 'undefined') {
+                    jQuery(document.body).on('updated_checkout', function() {
+                        setTimeout(highlightErrorFields, 100);
+                    });
+                    
+                    jQuery(document.body).on('checkout_error', function() {
+                        setTimeout(highlightErrorFields, 100);
+                    });
+                }
+                
+                // Run after form validation attempts
+                const checkoutForm = document.querySelector('form.checkout');
+                if (checkoutForm) {
+                    checkoutForm.addEventListener('submit', function() {
+                        setTimeout(highlightErrorFields, 500);
+                    });
+                }
+                
+                // Periodically check for errors (fallback)
+                setInterval(highlightErrorFields, 2000);
+            });
+            </script>
+            <?php
+        });
+
+        // WooCommerce Account Page Login Redirect Fix
+        // Evita redirect al login admin e mostra sempre il login WooCommerce
+        add_action('template_redirect', function() {
+            if ( is_admin() ) return; // ignora backend
+            if ( ! is_user_logged_in() && is_account_page() ) {
+                remove_action('template_redirect', 'wp_redirect_admin_locations');
+            }
+        });
 
     }
 });
@@ -165,3 +244,61 @@ add_action('wp_footer', function() {
     </script>
     <?php
 });
+
+/**
+ * Display free shipping message after product price
+ */
+function display_free_shipping_message() {
+    if ( ! is_product() ) return;
+    
+    ?>
+    <div class="free-shipping-message" style="
+        background-color: #fff;
+        border: 2px solid #BFA389;
+        border-radius: 10px;
+        padding: 5px 10px;
+        margin-top: 20px;
+        font-size: 16px;
+        color: #BFA389;
+        text-align: center;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    ">
+        Raggiungi almeno 99€ di spesa totale per ottenere la spedizione gratuita!
+    </div>
+    <?php
+}
+
+/**
+ * Display dynamic free shipping message on cart page
+ */
+function display_cart_free_shipping_message() {
+    if ( ! is_cart() ) return;
+    
+    // Get cart total
+    $cart_total = WC()->cart->get_subtotal();
+    $free_shipping_threshold = 99;
+    
+    // Calculate remaining amount
+    $remaining_amount = $free_shipping_threshold - $cart_total;
+    
+    // Only show if cart total is less than threshold
+    if ( $remaining_amount > 0 ) {
+        ?>
+        <div class="cart-free-shipping-message" style="
+            background-color: #fff;
+            border: 2px solid #BFA389;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #BFA389;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        ">
+            Aggiungi altri <?php echo wc_price( $remaining_amount ); ?> alla tua spesa totale per ottenere la spedizione gratuita!
+        </div>
+        <?php
+    }
+}
