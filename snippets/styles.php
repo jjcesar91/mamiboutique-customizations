@@ -300,6 +300,195 @@ function add_custom_site_styles() {
         padding: 10px 5px !important;
         box-sizing: border-box !important;
     }
+    
+    /* Sticky Filter Button Styles */
+    .sticky-filter-btn {
+        position: fixed;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #BFA389;
+        color: #fff;
+        border: none;
+        border-radius: 10px 0 0 10px;
+        padding: 20px 15px;
+        cursor: pointer;
+        z-index: 9997;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        font-family: inherit;
+        font-weight: 600;
+        letter-spacing: 1px;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+    }
+    
+    .sticky-filter-btn:hover {
+        background-color: #a68d75;
+        box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.25);
+        padding-left: 20px;
+    }
+    
+    .sticky-filter-btn .filter-icon {
+        font-size: 24px;
+        display: block;
+        transform: rotate(90deg);
+    }
+    
+    .sticky-filter-btn .filter-text {
+        font-size: 14px;
+        display: block;
+    }
+    
+    /* Filter Panel Styles */
+    .filter-panel {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 450px;
+        height: 100vh;
+        background-color: #fff;
+        z-index: 9998;
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+    }
+    
+    .filter-panel.active {
+        right: 0;
+    }
+    
+    .filter-panel::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+        z-index: -1;
+    }
+    
+    .filter-panel.active::before {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .filter-panel-header {
+        position: sticky;
+        top: 0;
+        background-color: #BFA389;
+        color: #fff;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-panel-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    
+    .close-filter-btn {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 32px;
+        cursor: pointer;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .close-filter-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+    
+    .close-filter-btn .close-icon {
+        line-height: 1;
+    }
+    
+    .filter-panel-content {
+        padding: 25px;
+    }
+    
+    .filter-panel-content .widget {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .filter-panel-content .widget:last-child {
+        border-bottom: none;
+    }
+    
+    .filter-panel-content .widget-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-panel-content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .filter-panel-content ul li {
+        padding: 8px 0;
+    }
+    
+    .filter-panel-content ul li a {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-size: 15px;
+    }
+    
+    .filter-panel-content ul li a:hover {
+        color: #BFA389;
+    }
+    
+    /* Responsive Styles for Filter */
+    @media (max-width: 768px) {
+        .filter-panel {
+            max-width: 100%;
+        }
+        
+        .sticky-filter-btn {
+            padding: 15px 10px;
+        }
+        
+        .sticky-filter-btn .filter-text {
+            font-size: 12px;
+        }
+        
+        .filter-panel-header h2 {
+            font-size: 20px;
+        }
+    }
     </style>
     <?php
 }

@@ -29,6 +29,9 @@ add_action( 'plugins_loaded', function () {
         // Free shipping message on cart page
         add_action( 'woocommerce_before_cart', 'display_cart_free_shipping_message' );
         
+        // Sticky filter button on shop page
+        add_action( 'wp_footer', 'add_shop_sticky_filter_button' );
+        
         // WC Trust Links below Add to Cart button
         add_action('woocommerce_single_product_summary', function () {
             echo '<div class="wc-trust-links" style="margin-top:12px; font-size:14px; line-height:1.4;">'
@@ -301,4 +304,69 @@ function display_cart_free_shipping_message() {
         </div>
         <?php
     }
+}
+
+/**
+ * Add sticky filter button and full-screen filter panel on shop page
+ */
+function add_shop_sticky_filter_button() {
+    if ( ! is_shop() && ! is_product_category() && ! is_product_tag() ) return;
+    ?>
+    <!-- Sticky Filter Button -->
+    <button id="sticky-filter-btn" class="sticky-filter-btn" aria-label="Apri filtri">
+        <span class="filter-icon">⚙</span>
+        <span class="filter-text">FILTRO</span>
+    </button>
+    
+    <!-- Full Screen Filter Panel -->
+    <div id="filter-panel" class="filter-panel">
+        <div class="filter-panel-header">
+            <h2>Filtri</h2>
+            <button id="close-filter-btn" class="close-filter-btn" aria-label="Chiudi filtri">
+                <span class="close-icon">✕</span>
+            </button>
+        </div>
+        <div class="filter-panel-content">
+            <?php echo do_shortcode('[wpf-filters id=1]'); ?>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtn = document.getElementById('sticky-filter-btn');
+        const filterPanel = document.getElementById('filter-panel');
+        const closeBtn = document.getElementById('close-filter-btn');
+        
+        if (!filterBtn || !filterPanel || !closeBtn) return;
+        
+        // Open filter panel
+        filterBtn.addEventListener('click', function() {
+            filterPanel.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+        
+        // Close filter panel
+        closeBtn.addEventListener('click', function() {
+            filterPanel.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        });
+        
+        // Close on overlay click
+        filterPanel.addEventListener('click', function(e) {
+            if (e.target === filterPanel) {
+                filterPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && filterPanel.classList.contains('active')) {
+                filterPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    </script>
+    <?php
 }
